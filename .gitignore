@@ -1,3 +1,4 @@
 # .gitignore
 /Part1/
 /Part2/
+/.venv
