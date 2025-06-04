@@ -437,16 +437,15 @@ def process_image_color_moments(image_path, visualize=True, output_dir="results"
 def compute_gradient(cell):
     kernel_x = np.array([[-1, 0, 1]], dtype=np.float32)  # dI/dx
     kernel_y = np.array([[-1], [0], [1]], dtype=np.float32)  # dI/dy
-
-
-
-    for i in range(cell.shape[1]):
-        for j in range(cell.shape[2]):
-            grad_x = sum(cell[j:j + 3] * kernel_x)
-            grad_y = sum(cell[i:i + 3] * kernel_y)
-            magnitude = np.sqrt(grad_x ** 2 + grad_y ** 2)
-            orientation = np.arctan2(grad_y, grad_x)
-            print(i, j, magnitude, orientation)
+    for row in range(1,cell.shape[1] - 1):
+        for col in range(1,cell.shape[2] - 1):
+            print("Grad_x: " + str(cell[:,row,col - 1 :col + 2].tolist()))
+            print("Grad_y" + str(cell[:,row - 1:row + 2,col].tolist()))
+            #grad_x = sum(cell[:,row,col - 1 :col + 1] * kernel_x)
+            #grad_y = sum(cell[:,row - 1:row + 1,col] * kernel_y)
+            #magnitude = np.sqrt(grad_x ** 2 + grad_y ** 2)
+            #orientation = np.arctan2(grad_y, grad_x)
+            #print(col, row, grad_x, grad_y, magnitude,orientation)
 
 
 def compute_hog_features(grid_cells, grid_size=(10, 10), image_name=None, output_dir="results", **kwargs):
@@ -468,13 +467,10 @@ def compute_hog_features(grid_cells, grid_size=(10, 10), image_name=None, output
 
     # Maschere per i gradient
 
-    cell_idx = 0
     print(len(grid_cells))
-    for i in range(grid_rows):
-        for j in range(grid_cols):
-            cell = grid_cells[cell_idx]
-            cell = np.pad(cell, 1, 'edge')
-            compute_gradient(cell)
+    for cell in grid_cells:
+        cell = np.pad(cell, pad_width=((0, 0), (1, 1), (1, 1)), mode='edge')
+        compute_gradient(cell)
 
     '''
     # Save feature vector if needed
