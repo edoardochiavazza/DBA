@@ -1,5 +1,4 @@
 import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
@@ -222,7 +221,7 @@ def compute_grid_cells(img_tensor, grid_size=(10, 10)):
 
 
 def compute_color_moments(grid_cells, grid_size=(10, 10), image_name=None,
-                          visualize=False, output_dir="Task1/results", **kwargs):
+                          visualize=False, output_dir="Task1/results"):
     """
     Compute color moments (mean, std, skewness) for each RGB channel in each grid cell.
     """
@@ -455,9 +454,9 @@ def process_image_with_features(image_path, feature_configs, visualize=False, ou
     """
     image_name = os.path.splitext(os.path.basename(image_path))[0]
     print(f"Processing image: {image_name}")
-
-    full_output_dir = os.path.join(output_dir, image_name)
-    os.makedirs(full_output_dir, exist_ok=True)
+    if output_dir is  not None:
+        full_output_dir = os.path.join(output_dir, image_name)
+        os.makedirs(full_output_dir, exist_ok=True)
 
     results = {}
 

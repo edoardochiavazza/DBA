@@ -2,7 +2,7 @@ from Task1 import task1 as t1
 import os
 
 if __name__ == "__main__":
-    root_folder_image = "../Part1/brain_glioma"
+    root_folder_image = "../Part1/brain_tumor"
     base_output_dir = "results"
     for dirpath, dirnames, filenames in os.walk(root_folder_image):
         for filename in filenames:
