@@ -15,7 +15,6 @@ def compute_k_search(image_path, k):
     root_folder_image = "../Task2/results"
 
     dict_input_image = t1.process_image_all_features(image_path, output_dir=None)
-    print(dict_input_image.keys())
     for dirpath, dirnames, filenames in os.walk(root_folder_image):
         image_name = os.path.basename(dirpath)
         for filename in filenames:
@@ -46,7 +45,7 @@ def compute_k_search(image_path, k):
                 similarity_dict_resnet_fc[image_name] = np.dot(vect_input, resnet_fc_npy) / (np.linalg.norm(vect_input) * np.linalg.norm(resnet_fc_npy))
             else:
                print("unknown file or feature vector")
-        
+
 
     similarity_dict_resnet_fc = sorted(similarity_dict_resnet_fc.items(), key=lambda item: item[1], reverse=True)[1:k+1]
     similarity_dict_resnet_avg = sorted(similarity_dict_resnet_avg.items(), key=lambda item: item[1], reverse=True)[1:k+1]
