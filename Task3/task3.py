@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from Task1 import task1 as t1
-
+from sklearn.metrics.pairwise import euclidean_distances
 
 def compute_k_search(image_path, k):
 
@@ -19,11 +19,12 @@ def compute_k_search(image_path, k):
         image_name = os.path.basename(dirpath)
         for filename in filenames:
             full_path = os.path.join(dirpath, filename)
+            print(full_path)
             if filename == "cm10x10_features.npy":
                 feature_vect_npy=np.load(full_path)
                 vect_input = dict_input_image["color_moments"]
-                #similarity_dict_cm[image_name] = np.linalg.norm(vect_input - feature_vect_npy) # cm sono rappresentazioni statistiche compatte (media, varianza, skewness) distaza euclidea va bene
-                similarity_dict_cm[image_name] = np.dot(vect_input, feature_vect_npy) / (np.linalg.norm(vect_input) * np.linalg.norm(feature_vect_npy))   #cosine similarity
+                distance = euclidean_distances(vect_input, feature_vect_npy)
+                similarity_dict_cm[image_name] = distance
             elif filename == "hog_features.npy":
                 hog_npy=np.load(full_path)
                 vect_input = dict_input_image["hog_features"]
@@ -55,8 +56,6 @@ def compute_k_search(image_path, k):
     similarity_dict_cm = sorted(similarity_dict_cm.items(), key=lambda item: item[1], reverse=True)[1:k + 1]
 
     return similarity_dict_cm, similarity_dict_hog, similarity_dict_resnet_layer3, similarity_dict_resnet_fc, similarity_dict_resnet_avg
-
-
 
 def show_k_images(sim_dict, feature, metrica, image_input):
     print("Nome immagine in input: " + str(os.path.basename(image_input)))

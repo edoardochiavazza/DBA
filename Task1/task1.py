@@ -232,31 +232,34 @@ def compute_color_moments(grid_cells, grid_size=(10, 10), image_name=None,
         os.makedirs(full_output_dir, exist_ok=True)
 
     feature_vector = np.zeros((grid_rows, grid_cols, 3, 3))
-
     cell_idx = 0
     for i in range(grid_rows):
         for j in range(grid_cols):
             cell = grid_cells[cell_idx]
             cell_np = cell.numpy()
-
+            # Aggiungi controlli per identificare la fonte:
             for channel in range(3):  # RGB channels
                 # Mean (1st moment)
+                
                 mean = np.mean(cell_np[channel])
                 feature_vector[i, j, channel, 0] = mean
 
                 # Standard deviation (2nd moment)
                 std = np.std(cell_np[channel])
                 feature_vector[i, j, channel, 1] = std
-
                 # Skewness (3rd moment)
-                if std == 0:
+                channel_data = cell_np[channel].flatten()
+                # Rimuovi NaN e controlla se rimangono abbastanza valori
+                valid_data = channel_data[~np.isnan(channel_data)]
+
+                if len(valid_data) < 3 or np.std(valid_data) < 1e-10:
                     skewness = 0
                 else:
-                    skewness = stats.skew(cell_np[channel].flatten())
+                    skewness = stats.skew(valid_data)
+                    if np.isnan(skewness):
+                        skewness = 0
                 feature_vector[i, j, channel, 2] = skewness
-
             cell_idx += 1
-
     if visualize and image_name:
         img_resized = reconstruct_image_from_cells(grid_cells, grid_size)
         visualize_color_moments(img_resized, feature_vector, full_output_dir)
@@ -599,7 +602,7 @@ def process_image_all_features(image_path, output_dir="Task1/results"):
 # Example usage
 if __name__ == "__main__":
     # Example 1: Extract only ResNet avgpool features
-    image_path = "Part1/brain_glioma/brain_glioma_0001.jpg"
+    image_path = "../Part1/brain_menin/brain_menin_0108.jpg"
 
     # ResNet features
     #avgpool_features = process_image_resnet(image_path, 'avgpool_1024', 'resnet50')
@@ -611,13 +614,12 @@ if __name__ == "__main__":
         #output_dir="results"
     #)
 
-    # color_features = process_image_color_moments(
-    # image_path=image_p,
-    # visualize=True,
-    # output_dir="results"
-    # )
+    color_features = process_image_color_moments(
+    image_path=image_path,
+    visualize=False, 
+    output_dir=None)
     # Example 2: Extract all features
-    all_features = process_image_all_features(image_path)
+    #all_features = process_image_all_features(image_path)
 
     # Example 3: Custom feature combination
     # custom_features = process_image_with_features(

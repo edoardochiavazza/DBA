@@ -1,0 +1,8 @@
+{
+    "feature_type": "hog_features",
+    "method": "kmeans",
+    "k": 100,
+    "latent_semantics": [
+        {
+            "image_id": "brain_menin_0554",
+            "weights": 

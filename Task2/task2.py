@@ -1,12 +1,35 @@
 from Task1 import task1 as t1
 import os
+import numpy as np
+from pathlib import Path
+
+def check_npy_files(root_folder):
+    for dirpath, dirnames, filenames in os.walk(root_folder):
+        for file in filenames:
+            if file.endswith('.npy'):
+                file_path = os.path.join(dirpath, file)
+                try:
+                    data = np.load(file_path)
+
+                    if np.isnan(data).any():
+                        print(f"Contiene NaN: {file_path}")
+                    elif np.all(data == 0):
+                        print(f"Tutti zeri: {file_path}")
+
+                except Exception as e:
+                    print(f"Errore nel file {file_path}: {e}")
+
+
 
 if __name__ == "__main__":
-    root_folder_image = "../Part1/brain_tumor"
-    base_output_dir = "results"
+    """
+    root_folder_image = "../Part2/"
+    base_output_dir = "part2_results"
     for dirpath, dirnames, filenames in os.walk(root_folder_image):
         for filename in filenames:
             # Percorso immagine completo
+            if filename == ".DS_Store" and os.path.abspath(dirpath) == os.path.abspath(root_folder_image):
+                continue
             image_path = os.path.join(dirpath, filename)
 
             # Ricava il nome della sottocartella relativa a root_folder_image
@@ -26,3 +49,6 @@ if __name__ == "__main__":
 
             # Chiama la tua funzione con i percorsi corretti
             all_features = t1.process_image_all_features(image_path, output_dir=output_dir)
+            """
+    check_npy_files("part2_results")
+
