@@ -10,6 +10,8 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from torchvision.io import read_image
 
+from Task5 import task5
+
 
 def load_images(folder_path, target_size=(224, 224)):
     images = []
@@ -60,7 +62,7 @@ def load_images(folder_path, target_size=(224, 224)):
     print(f"Dati pronti: {data.shape}")
 
     return data, labels
-
+"""
 def load_images_divide_for_labels(folder_path, target_size=(224, 224)):
     vec_images_tumor = []
     vec_images_menin = []
@@ -124,7 +126,7 @@ def load_images_divide_for_labels(folder_path, target_size=(224, 224)):
     print(f"Data ready")
 
     return vec_images_tumor, vec_images_menin, vec_images_glioma
-
+"""
 def print_inherith_dimension_svd(data):
     """
     Extract top-k latent semantics using SVD
@@ -218,26 +220,27 @@ if __name__ == '__main__':
 
     warnings.filterwarnings('ignore', category=RuntimeWarning)
     path = "../Part1"
-    print("Performing inherent dimensionality associated with the part 1 images")
-    data, labels = load_images(path, target_size=(224, 224))
-    print_inherith_dimension_svd(data)
-    lda_latent_semantics(data, labels)
-    pca_latent_semantics(data)
-    mle_latent_semantics(data)
-    vec_images_tumor, vec_images_menin, vec_images_glioma = load_images_divide_for_labels(path, target_size=(224, 224))
-    vec_labels_tumor = ["brain_tumor"] * len(vec_images_tumor)
-    vec_labels_menin = ["brain_menin"] * len(vec_images_menin)
-    vec_labels_glioma = ["brain_glioma"] * len(vec_images_glioma)
-    print("Performing inherent dimensionality for tumor label ")
-    print_inherith_dimension_svd(vec_images_tumor)
-    pca_latent_semantics(vec_images_tumor)
-    mle_latent_semantics(vec_images_tumor)
-    print("Performing inherent dimensionality for menin label")
-    print_inherith_dimension_svd(vec_images_menin)
-    pca_latent_semantics(vec_images_menin)
-    mle_latent_semantics(vec_images_menin)
-    print("Performing inherent dimensionality for glioma label")
-    print_inherith_dimension_svd(vec_images_glioma)
-    pca_latent_semantics(vec_images_glioma)
-    mle_latent_semantics(vec_images_glioma)
+    features_vect = ["hog_features", "cm10x10_features", "resnet_avgpool_1024_features", "resnet_fc_1000_features",
+                     "resnet_layer3_1024_features", "rgb"]
+    for feature in features_vect:
+
+        if feature == "rgb":
+            data, labels = load_images(path, target_size=(224, 224))
+        else:
+            data, labels, _ = task5.load_data_and_label_feature(feature, root_dir="../Task2/new_results")
+        data_train = np.array(data)
+        labels_train = np.array(labels)
+        print("Performing inherent dimensionality associated with the part 1 images")
+        print_inherith_dimension_svd(data)
+        lda_latent_semantics(data, labels)
+        pca_latent_semantics(data)
+        mle_latent_semantics(data)
+        dict_data_test = {"brain_tumor": data_train[labels_train == "brain_tumor"],
+                          "brain_menin": data_train[labels_train == "brain_menin"],
+                          "brain_glioma": data_train[labels_train == "brain_glioma"]}
+        for key in dict_data_test:
+            print(f"Performing inherent dimensionality for {key} label ")
+            print_inherith_dimension_svd(dict_data_test[key])
+            pca_latent_semantics(dict_data_test[key])
+            mle_latent_semantics(dict_data_test[key])
 

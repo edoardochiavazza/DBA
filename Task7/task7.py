@@ -151,7 +151,6 @@ if __name__ == '__main__':
         else:
             data_train, labels_train, images_names_train = task5.load_data_and_label_feature(feature, root_dir="../Task2/new_results")
             data_test, labels_test, images_names_test = task5.load_data_and_label_feature(feature,root_dir="../Task2/part2_results")
-        print("-" * 300)
         data_train = np.array(data_train)
         labels_train = np.array(labels_train)
         dict_data_test = {"tumor": data_train[labels_train == "brain_tumor"], "menin": data_train[labels_train == "brain_menin"], "glioma": data_train[labels_train == "brain_glioma"]}
@@ -175,6 +174,7 @@ if __name__ == '__main__':
                 dict_sim_pca_euclidean[key]   = np.sqrt(np.sum((img_test_pca - centroid_pca_label) ** 2))
             max_key_cosine = max(dict_sim_pca_cosine, key=dict_sim_pca_cosine.get)
             max_key_eucledian = max(dict_sim_pca_euclidean, key=dict_sim_pca_euclidean.get)
+            print("Name image: ", images_names_test[i],"Prediction cosine similarity: ", max_key_cosine ," Prediction euclidean similarity for centroid pca: ", max_key_eucledian, " Truth label: ", label)
             predictions_test_euclidean.append("brain_"+max_key_eucledian)
             predictions_test_cosine.append("brain_"+max_key_cosine)
         print("Metrics compute using cosine similarity:")
