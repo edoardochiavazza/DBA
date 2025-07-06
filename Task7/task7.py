@@ -27,8 +27,8 @@ def compute_pca_latent(data, k):
     data_reduced = pca.fit_transform(data)
     return data_reduced,pca
 
-def train_knn(data, labels):
-    knn = KNeighborsClassifier(n_neighbors=5)
+def train_knn(data, labels, num_neighbors = 5):
+    knn = KNeighborsClassifier(n_neighbors= num_neighbors)
     knn.fit(data, labels)
     return knn
 
