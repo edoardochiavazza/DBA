@@ -223,7 +223,6 @@ if __name__ == '__main__':
     features_vect = ["hog_features", "cm10x10_features", "resnet_avgpool_1024_features", "resnet_fc_1000_features",
                      "resnet_layer3_1024_features", "rgb"]
     for feature in features_vect:
-
         if feature == "rgb":
             data, labels = load_images(path, target_size=(224, 224))
         else:

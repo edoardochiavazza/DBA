@@ -60,7 +60,7 @@ def compute_k_search(image_path, k):
 def show_k_images(sim_dict, feature, metrica, image_input):
     print("Nome immagine in input: " + str(os.path.basename(image_input)))
     img_input = mpimg.imread(image_input)
-    plot = plt.imshow(img_input, cmap="grey")
+    plt.imshow(img_input, cmap="grey")
     plt.show()
     for image_name, sim_value in sim_dict:
         print("Nome immagine: " +  str(image_name))
