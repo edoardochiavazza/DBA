@@ -5,11 +5,11 @@
 ∗ visualizes the t most similar images,
 ∗ outputs the numbers of unique and overall number of images considered during the process
 """
-import os
 import random
 
 import numpy as np
 from matplotlib import image as mpimg, pyplot as plt
+from scipy.spatial.distance import pdist
 from sklearn.preprocessing import StandardScaler
 
 from Task10.task10a import EuclideanLSH
@@ -45,13 +45,15 @@ if __name__ == '__main__':
     k_95 = task6.pca_latent_semantics(data_train)
     data_reduced_pca, pca = compute_pca_latent(data_train, k_95)
 
-    L = 5  # numero di layer
-    h = 3  # hash per layer
+    distances = pdist(data_reduced_pca, metric='euclidean')
+    R = np.percentile(distances, 95)
+    L = 10  # numero di layer
+    h = 5  # hash per layer
     d = data_reduced_pca.shape[1]  # dimensionalità
 
     # Crea indice LSH
 
-    lsh = EuclideanLSH(L=L, h=h, d=d, r=10)
+    lsh = EuclideanLSH(L=L, h=h, d=d, r=R)
 
     # Aggiungi vettori
     lsh.add_vectors(data_reduced_pca)
