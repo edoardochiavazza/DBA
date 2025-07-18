@@ -79,12 +79,11 @@ def lda_latent_semantics(data, labels, k):
     # Maximum number of LDA components = min(n_features, n_classes-1)
     unique_labels = np.unique(labels)
     max_components = min(data.shape[1], len(unique_labels) - 1)
-    if max_components < k:
-        k = max_components
-        print(f" using max_components = {max_components} because {k} is too big")
     print(f"Data shape: {data.shape}")
     print(f"Classes: {len(unique_labels)} → Max LDA components: {k}")
-
+    if max_components < k:
+        print(f" using max_components = {max_components} because {k} is too big")
+        k = max_components
     # LDA
     print("Performing LDA...")
     lda = LinearDiscriminantAnalysis(n_components=k)
@@ -134,6 +133,8 @@ def print_top_k_semantics(data_projected, labels, technique, k, image_name, **kw
     elif technique == "svd":
         data_original = kwargs["data_original"]
         data_reconstructed = kwargs["data_reconstructed"]
+        print("forma orignale: ",data_original.shape )
+        print("forma reconstructed: ",data_reconstructed.shape )
         reconstruction_errors = np.linalg.norm(data_original - data_reconstructed, axis=1)
 
         # Ordinamento per rappresentatività
@@ -237,26 +238,24 @@ if __name__ == '__main__':
     else:
         k = int(input("Enter the value of k (1<= k <= 2): "))
 
-    try:
-        # Load data
-        print(f"\nLoading {feature_model} data...")
-        data, labels, images_names = load_data_and_label_feature(feature_model)
-        print(f"Data loaded: {data.shape}")
-        print(f"Number of images: {len(images_names)}")
-        print(f"Number of classes: {len(np.unique(labels))}")
 
-        # Extract latent semantics based on selected technique
-        if techniques[choice] == "svd":
-            data_reduced,data_reconstructed,_ = svd_latent_semantics(data,k)
-            kwargs = {"data_original": data, "data_reconstructed": data_reconstructed}
-        elif techniques[choice] == "lda":
-            data_reduced, lda = lda_latent_semantics(data, labels,k)
-            kwargs = {"lda": lda}
-        elif techniques[choice] == "kmeans":
-            data_reduced, km = kmeans_latent_semantics(data,k)
-            kwargs = {"km": km}
-        print_top_k_semantics(data_reduced, labels, techniques[choice], k, images_names, **kwargs)
-        save_latent_semantics(data_reduced, labels, techniques[choice], k, images_names, feature_model)
-    except Exception as e:
-        print(f"Error during execution: {e}")
-        traceback.print_exc()
+    # Load data
+    print(f"\nLoading {feature_model} data...")
+    data, labels, images_names = load_data_and_label_feature(feature_model, "../Task2/new_results/")
+    print(f"Data loaded: {data.shape}")
+    print(f"Number of images: {len(images_names)}")
+    print(f"Number of classes: {len(np.unique(labels))}")
+
+    # Extract latent semantics based on selected technique
+    if techniques[choice] == "svd":
+        data_reduced,data_reconstructed,_ = svd_latent_semantics(data,k)
+        kwargs = {"data_original": data, "data_reconstructed": data_reconstructed}
+    elif techniques[choice] == "lda":
+        data_reduced, lda = lda_latent_semantics(data, labels,k)
+        kwargs = {"lda": lda}
+    elif techniques[choice] == "kmeans":
+        data_reduced, km = kmeans_latent_semantics(data,k)
+        kwargs = {"km": km}
+    print_top_k_semantics(data_reduced, labels, techniques[choice], k, images_names, **kwargs)
+    save_latent_semantics(data_reduced, labels, techniques[choice], k, images_names, feature_model)
+

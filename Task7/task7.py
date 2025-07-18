@@ -130,7 +130,7 @@ if __name__ == '__main__':
     path_part1 = "../Part1"
     path_part2 = "../Part2"
     print("Reduce and classification using all the illness brain vectors together")
-    features_vect = ["hog_features", "cm10x10_features", "resnet_avgpool_1024_features", "resnet_fc_1000_features", "resnet_layer3_1024_features", "rgb"]
+    features_vect = ["hog_features", "cm10x10_features", "resnet_avgpool_1024_features", "resnet_fc_1000_features", "resnet_layer3_1024_features"]
     for feature in features_vect:
         print(f"Using feature space: {feature}")
         print(f"Loading training data for {feature}...")
@@ -142,6 +142,9 @@ if __name__ == '__main__':
             data_test, labels_test, images_names_test = task5.load_data_and_label_feature(feature,root_dir="../Task2/part2_results")
         print(f"Loading test data for {feature}...")
         compute_reduction_classifing_metrics(data_test, data_train ,labels_test, labels_train)
+
+
+
     print("Reduce the illness brain vectors one for one and use cosine similarity for compute similarity (cs bc is in)")
     for feature in features_vect:
         print(f"Using feature space: {feature}")
@@ -162,19 +165,20 @@ if __name__ == '__main__':
             centroid_pca = data_reduced_pca.mean(axis=0)
             centroids_dict_test_pca[key] = (centroid_pca, pca)
         for i in range(0, len(data_test)):
-            img = data_test[i].reshape(1, -1)
+            img = data_test[i].reshape(1, -1) # da tensore a vettore
             label = labels_test[i]
             dict_sim_pca_cosine = {}
             dict_sim_pca_euclidean = {}
             for key in centroids_dict_test_pca:
-                pca = centroids_dict_test_pca[key][1]
-                centroid_pca_label = centroids_dict_test_pca[key][0]
+                pca = centroids_dict_test_pca[key][1] # modello pca addestrato per label
+                centroid_pca_label = centroids_dict_test_pca[key][0] #vettore del centroide della label (cofronto con i tre ceontroidi per trovare quello piu vicino all imamignie)
                 img_test_pca = pca.transform(img)
                 dict_sim_pca_cosine[key] = cosine_similarity(img_test_pca,  centroid_pca_label)
                 dict_sim_pca_euclidean[key]   = np.sqrt(np.sum((img_test_pca - centroid_pca_label) ** 2))
             max_key_cosine = max(dict_sim_pca_cosine, key=dict_sim_pca_cosine.get)
             max_key_eucledian = max(dict_sim_pca_euclidean, key=dict_sim_pca_euclidean.get)
-            print("Name image: ", images_names_test[i],"Prediction cosine similarity: ", max_key_cosine ," Prediction euclidean similarity for centroid pca: ", max_key_eucledian, " Truth label: ", label)
+            if i < 5: # stampo prime 5 immagini
+                print("Name image: ", images_names_test[i],"Prediction cosine similarity: ", max_key_cosine ," Prediction euclidean similarity for centroid pca: ", max_key_eucledian, " Truth label: ", label)
             predictions_test_euclidean.append("brain_"+max_key_eucledian)
             predictions_test_cosine.append("brain_"+max_key_cosine)
         print("Metrics compute using cosine similarity:")

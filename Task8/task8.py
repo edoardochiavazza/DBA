@@ -71,6 +71,7 @@ def plot_all_datasets_together(dict_data_test, centroids_dict_dbscan, dict_sorte
         # Determina quali cluster plottare (top c)
         unique_labels = set(labels)
         sorted_list = list(sorted_keys)[:c] if c <= len(sorted_keys) else list(sorted_keys)
+        sorted_list = list(sorted_keys)[:c] if c <= len(sorted_keys) else list(sorted_keys)
         clusters_to_plot = set(sorted_list)
 
         # Aggiungi sempre il rumore se presente
@@ -179,7 +180,7 @@ def plot_clusters_with_images(data, labels, images, title="Clusters", exclude=No
         thumbnail_size: dimensione thumbnail in pixel
         max_images_per_cluster: massimo numero di immagini per cluster da mostrare
     """
-    # Riduzione dimensionalità se necessario
+
     if data.shape[1] > 2:
         data_2d = PCA(n_components=2).fit_transform(data)
     else:
@@ -214,7 +215,7 @@ def plot_clusters_with_images(data, labels, images, title="Clusters", exclude=No
 
         # Limita il numero di immagini da mostrare
         if len(cluster_images) > max_images_per_cluster:
-            # Seleziona immagini casuali o le prime N
+
             indices = np.random.choice(len(cluster_images), max_images_per_cluster, replace=False)
             cluster_images = cluster_images[indices]
             cluster_data = cluster_data[indices]
@@ -321,7 +322,7 @@ def plot_all_datasets_with_images(dict_data_test, centroids_dict_dbscan, dict_im
         labels = centroids_dict_dbscan[key]
         sorted_keys = dict_sorted_cluster[key]
 
-        # Riduzione dimensionalità se necessario
+
         if data.shape[1] > 2:
             data_2d = PCA(n_components=2).fit_transform(data)
         else:
@@ -367,7 +368,7 @@ def plot_all_datasets_with_images(dict_data_test, centroids_dict_dbscan, dict_im
                 cluster_images = cluster_images[indices]
                 cluster_data = cluster_data[indices]
 
-            # Posiziona le immagini in modo più distribuito
+
             n_images = len(cluster_images)
 
             # Calcola posizioni in cerchio attorno al centroide
@@ -379,7 +380,7 @@ def plot_all_datasets_with_images(dict_data_test, centroids_dict_dbscan, dict_im
                 x = centroid[0] + radius * np.cos(angle)
                 y = centroid[1] + radius * np.sin(angle)
 
-                # Gestisci il tipo di immagine
+
                 if img.dtype != np.uint8:
                     if img.max() <= 1.0:
                         img = (img * 255).astype(np.uint8)
@@ -505,21 +506,20 @@ def sorted_cluster(data, labels):
     cluster_scores = dict(sorted(cluster_scores.items(), key=lambda x: x[1]['silhouette'], reverse=True))
     return cluster_scores.keys()
 
-def find_optimal_eps(data, k=5):
+def find_optimal_eps(data, k=10):
     """Trova eps ottimale usando k-distance plot"""
 
     # Calcola distanze ai k vicini più prossimi
     neighbors = NearestNeighbors(n_neighbors=k)
     neighbors_fit = neighbors.fit(data)
-    distances, indices = neighbors_fit.kneighbors(data)
+    distances, indices = neighbors_fit.kneighbors(data) # calcol odistanze tra k vicini più prossimi
 
     # Ordina le distanze
     distances = np.sort(distances, axis=0)
     distances = distances[:, k - 1]  # k-esima distanza
 
-    # Suggerimento automatico (punto di massima curvatura)
     # Metodo semplice: usa percentile
-    suggested_eps = np.percentile(distances, 95)
+    suggested_eps = np.percentile(distances, 95) #prendo la 95
     print(f"Eps suggerito: {suggested_eps:.4f}")
 
     return suggested_eps
@@ -548,8 +548,6 @@ if __name__ == '__main__':
         dict_data_test = {"brain_tumor": data_train[labels_train == "brain_tumor"],
                           "brain_menin": data_train[labels_train == "brain_menin"],
                           "brain_glioma": data_train[labels_train == "brain_glioma"]}
-        predictions_test_cosine = []
-        predictions_test_euclidean = []
         centroids_dict_dbscan = {}
         best_dict_eps = {}
         # Usa per ogni feature space
@@ -570,7 +568,7 @@ if __name__ == '__main__':
             print("Estimated number of clusters: %d" % n_clusters_)
             print("Estimated number of noise points: %d" % n_noise_)
         dict_sorted_cluster = {}
-        cluster_num = 2
+        cluster_num = 3
         for key in centroids_dict_dbscan.keys():
             print(f"\nCompute the respective best cluster for {key} in feature space {feature}...")
             dict_sorted_cluster[key] = sorted_cluster(dict_data_test[key], centroids_dict_dbscan[key])

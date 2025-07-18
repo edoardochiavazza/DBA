@@ -45,8 +45,10 @@ if __name__ == '__main__':
     k_95 = task6.pca_latent_semantics(data_train)
     data_reduced_pca, pca = compute_pca_latent(data_train, k_95)
 
-    distances = pdist(data_reduced_pca, metric='euclidean')
-    R = np.percentile(distances, 95)
+    distances = pdist(data_reduced_pca, metric='euclidean') # calcolo tutte le distanze tratutti i puinti e faccio un vettore
+    R = np.percentile(distances, 95) # calcolo la distanza che prende il 95 percento di queste distanze
+    #R = 50
+    print(R)
     L = 10  # numero di layer
     h = 5  # hash per layer
     d = data_reduced_pca.shape[1]  # dimensionalità
@@ -60,6 +62,7 @@ if __name__ == '__main__':
 
     idx = np.random.randint(len(data_reduced_pca))
     query = data_reduced_pca[idx]
+    print(f"Query primi 5 elementi: {query[:5]}")
     name_img = images_names_train[idx]
     label_img = labels_train[idx]
     path_img = "../Part1/" + label_img+"/"+name_img+".jpg"
@@ -67,15 +70,24 @@ if __name__ == '__main__':
     img_input = mpimg.imread(path_img)
     plot = plt.imshow(img_input, cmap="grey")
     plt.show()
-
-    candidates = lsh.query(query, return_distances=True)
-    print(f"Query trovato {len(candidates)} candidati su {len(lsh.vectors)} totali")
-
     print("Statistiche indice:")
     stats = lsh.get_stats()
     for key, value in stats.items():
-        print(f"  {key}: {value}")
+        print(f"  {key}: {value:.2f}")
+    print(f"Query primi 5 elementi: {query[:5]}")
+    candidates, query_buckets, matches = lsh.search_with_info(query)
 
+    print("BUCKET DELLA QUERY:")
+    for item in query_buckets:
+        print(f"Layer {item['layer']}: bucket {item['bucket']}")
+
+    print(f"\nCANDIDATI TOTALI: {candidates}")
+
+    print("\nMATCH TROVATI:")
+    for item in matches:
+        print(f"Layer {item['layer']}: bucket {item['bucket']}, candidati: {item['candidates']}")
+    # Mostra primi 5 candidati ordinati per distanza
+    candidates = lsh.query(query, return_distances=True)
     n = 10
     # Mostra primi n candidati ordinati per distanza
     if candidates:
@@ -89,4 +101,4 @@ if __name__ == '__main__':
             img_input = mpimg.imread(path_img)
             plot = plt.imshow(img_input, cmap="grey")
             plt.show()
-            print(f"  {i + 1}. Nome immagine {name_img}: distanza = {dist:.3f}")
+            print(f"{i + 1}. Nome immagine {name_img}: distanza = {dist:.3f} prime 5 componenti = {vec[:5]}")

@@ -1,9 +1,9 @@
+import os
+
+import numpy as np
 from matplotlib import image as mpimg, pyplot as plt
 
 from Task1 import task1 as t1
-import os
-import numpy as np
-from sklearn.metrics.pairwise import nan_euclidean_distances
 
 """
 Implement a program which, given (a) a part 2 query image file, (b) a user selected feature
@@ -132,11 +132,11 @@ def print_ranking_info(image_in ,ranking_euclidean_distances, ranking_cosine_sim
 if __name__ == '__main__':
 
     #compute_average_all_features_space_for_all_labels()
-    avg_vect_glioma_i, avg_vect_menin_i, avg_vect_tumor_i = load_avg_feature_vector("cm")
+    avg_vect_glioma_i, avg_vect_menin_i, avg_vect_tumor_i = load_avg_feature_vector("rn_l3")
     image_input = "../Part2/brain_menin/brain_menin_1617.jpg"
-    dict_input_image_i = t1.process_image_all_features(image_input, output_dir=None)
+    dict_input_image_i = t1.process_image_all_features(image_input, output_dir=None, visualize=False)
     #in_k = input("seleziona un k (k<=2)")
     in_k = 2
-    ft = "color_moments"
+    ft = "resnet_layer3_1024"
     ranking_euclidean_distances_i, ranking_cosine_similarity_i = compute_top_k_score(in_k, dict_input_image_i, avg_vect_glioma_i, avg_vect_menin_i, avg_vect_tumor_i, ft)
     print_ranking_info(image_input, ranking_euclidean_distances_i,ranking_cosine_similarity_i, ft)

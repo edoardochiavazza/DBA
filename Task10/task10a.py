@@ -13,6 +13,7 @@ pp. 117-122.
 ∗ visualizes the t most similar images,
 ∗ outputs the numbers of unique and overall number of images considered during the process
 """
+import pickle
 
 import numpy as np
 from collections import defaultdict
@@ -23,7 +24,6 @@ class EuclideanLSH:
     def __init__(self, L, h, d, r=1.0):
         """
         LSH per distanza Euclidea
-
         Args:
             L: numero di layers (tabelle hash)
             h: numero di hash per layer
@@ -131,6 +131,79 @@ class EuclideanLSH:
                                         for bucket in table.values() if bucket])
         }
 
+    def print_bucket_contents(lsh_instance):
+        """
+        Stampa il contenuto di tutti i bucket in tutti i layer dell'istanza LSH
+
+        Args:
+            lsh_instance: un'istanza della classe EuclideanLSH
+        """
+        for layer_idx in range(lsh_instance.L):
+            print(f"\nLayer {layer_idx + 1}/{lsh_instance.L}:")
+            hash_table = lsh_instance.hash_tables[layer_idx]
+
+            if not hash_table:
+                print("  (Nessun bucket in questo layer)")
+                continue
+
+            for bucket_idx, (bucket_key, vector_ids) in enumerate(hash_table.items()):
+                print(f"  Bucket {bucket_idx + 1} (key: {bucket_key}): {vector_ids}")
+
+            print(f"  Totale bucket in questo layer: {len(hash_table)}")
+            print(f"  Totale elementi in questo layer: {sum(len(v) for v in hash_table.values())}")
+
+    def search_with_info(self, query_vector):
+        candidates = set()
+        query_buckets = []  # Tutti i bucket della query
+        matches = []  # Solo i layer con match
+
+        for layer_idx in range(self.L):
+            bucket_key = self._hash_vector(query_vector, layer_idx)
+
+            # Salva sempre il bucket della query per questo layer
+            query_buckets.append({
+                'layer': layer_idx,
+                'bucket': bucket_key
+            })
+
+            # Se c'è un match, salva anche i candidati
+            if bucket_key in self.hash_tables[layer_idx]:
+                layer_candidates = self.hash_tables[layer_idx][bucket_key]
+                candidates.update(layer_candidates)
+
+                matches.append({
+                    'layer': layer_idx,
+                    'bucket': bucket_key,
+                    'candidates': list(layer_candidates)
+                })
+
+        return candidates, query_buckets, matches
+
+    def save_pickle(self, filepath):
+        """
+        Salva l'indice usando pickle
+
+        Args:
+            filepath: percorso del file (es. "my_lsh_index.pkl")
+        """
+        with open(filepath, 'wb') as f:
+            pickle.dump(self, f)
+        print(f"Indice salvato in: {filepath}")
+
+    @classmethod
+    def load_pickle(cls, filepath):
+        """
+        Carica l'indice da file pickle
+
+        Args:
+            filepath: percorso del file
+
+        Returns:
+            istanza di EuclideanLSH caricata
+        """
+        with open(filepath, 'rb') as f:
+            return pickle.load(f)
+
 
 # Esempio d'uso
 if __name__ == "__main__":
@@ -148,24 +221,58 @@ if __name__ == "__main__":
 
     # Aggiungi vettori
     lsh.add_vectors(vectors)
-
-    # Query
-    query = np.random.randn(d)
-    candidates = lsh.query(query, return_distances=True)
-
-    print(f"Query trovato {len(candidates)} candidati")
+    #lsh.print_bucket_contents()
     print("Statistiche indice:")
     stats = lsh.get_stats()
     for key, value in stats.items():
-        print(f"  {key}: {value}")
+        print(f"  {key}: {value:.2f}")
+    # Query
+    query = np.random.randn(d)
+    print(f"Query primi 5 elementi: {query[:5]}")
+    candidates, query_buckets, matches = lsh.search_with_info(query)
+
+    print("BUCKET DELLA QUERY:")
+    for item in query_buckets:
+        print(f"Layer {item['layer']}: bucket {item['bucket']}")
+
+    print(f"\nCANDIDATI TOTALI: {candidates}")
+
+    print("\nMATCH TROVATI:")
+    for item in matches:
+        print(f"Layer {item['layer']}: bucket {item['bucket']}, candidati: {item['candidates']}")
+
 
     # Mostra primi 5 candidati ordinati per distanza
+    candidates = lsh.query(query, return_distances=True)
     if candidates:
         candidates.sort(key=lambda x: x[2])  # ordina per distanza
         print("\nTop 5 candidati più vicini:")
         for i, (vec_id, vec, dist) in enumerate(candidates[:5]):
-            print(f"  {i + 1}. Vettore {vec_id}: distanza = {dist:.3f}")
+            print(f"  {i + 1}. Vettore {vec_id}: distanza = {dist:.3f} prime 5 componenti = {vec[:5]}")
+
+    print("\nSalvataggio in pickle")
+    lsh.save_pickle("my_lsh_index.pkl")
 
 
+    print("\nCaricamento da pickle")
+    lsh_loaded = EuclideanLSH.load_pickle("LSH_INDEX.pkl")
+
+    print("Statistiche indice caricato:")
+    stats_loaded = lsh_loaded.get_stats()
+    for key, value in stats_loaded.items():
+        print(f"  {key}: {value:.2f}")
+
+    # Test query sull'indice caricato
+    query = np.random.randn(d)
+    candidates = lsh_loaded.query(query, return_distances=True)
+    if candidates:
+        candidates.sort(key=lambda x: x[2])
+        print(f"\nQuery test: trovati {len(candidates)} candidati")
+        print(f"Candidato più vicino: distanza = {candidates[0][2]:.3f}")
+
+    # Verifica che gli indici siano identici
+    print(f"\nVerifica identità: {np.array_equal(lsh.vectors[0], lsh_loaded.vectors[0])}")
+
+    print("\nSalvataggio e caricamento pickle completati con successo!")
 
 

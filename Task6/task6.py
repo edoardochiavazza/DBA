@@ -62,6 +62,7 @@ def load_images(folder_path, target_size=(224, 224)):
     print(f"Dati pronti: {data.shape}")
 
     return data, labels
+
 """
 def load_images_divide_for_labels(folder_path, target_size=(224, 224)):
     vec_images_tumor = []
@@ -143,7 +144,6 @@ def print_inherith_dimension_svd(data):
     # Cumulative explained variance
     cumulative_variance = np.cumsum(explained_variance_ratio)
 
-    # Select number of components to preserve 95% variance
     best_num = np.argmax(cumulative_variance >= 0.90) + 1
     print(f"Best number of components for maintain 90% variance: {best_num} applying SVD")
     best_num_95 = np.argmax(cumulative_variance >= 0.95) + 1
@@ -164,7 +164,6 @@ def lda_latent_semantics(data, labels):
     # Percentuale cumulativa
     cumulative = np.cumsum(eigenvalues)
 
-    # Select number of components to preserve 95% variance
     best_num = np.argmax(cumulative >= 0.90) + 1
     print(f"Best number of components for maintain 90% variance applying LDA: {best_num}")
     best_num_95 = np.argmax(cumulative >= 0.95) + 1
@@ -177,10 +176,9 @@ def lda_latent_semantics(data, labels):
 def pca_latent_semantics(data):
     print("Performing PCA...")
     pca = PCA()
-    pca.fit(data)
+    d = pca.fit_transform(data)
     # Calcolo varianza cumulativa
     cum_var = np.cumsum(pca.explained_variance_ratio_)
-    # Select number of components to preserve 95% variance
     best_num = np.argmax(cum_var >= 0.90) + 1
     print(f"Best number of components for maintain 90% variance applying PCA: {best_num}")
     best_num_95 = np.argmax(cum_var >= 0.95) + 1

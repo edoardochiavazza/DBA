@@ -3,6 +3,11 @@ import os
 import numpy as np
 from pathlib import Path
 
+"""
+Implement a program which extracts and stores feature descriptors for all images in
+the data set.
+"""
+
 def check_npy_files(root_folder):
     for dirpath, dirnames, filenames in os.walk(root_folder):
         for file in filenames:
@@ -19,10 +24,8 @@ def check_npy_files(root_folder):
                 except Exception as e:
                     print(f"Errore nel file {file_path}: {e}")
 
-
-
 if __name__ == "__main__":
-    """
+
     root_folder_image = "../Part2/"
     base_output_dir = "part2_results"
     for dirpath, dirnames, filenames in os.walk(root_folder_image):
@@ -48,7 +51,7 @@ if __name__ == "__main__":
             os.makedirs(output_dir, exist_ok=True)
 
             # Chiama la tua funzione con i percorsi corretti
-            all_features = t1.process_image_all_features(image_path, output_dir=output_dir)
-            """
+            all_features = t1.process_image_all_features(image_path, output_dir=output_dir, visualize=False)
+
     check_npy_files("part2_results")
 
